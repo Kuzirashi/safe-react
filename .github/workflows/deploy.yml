@@ -30,10 +30,11 @@ jobs:
       - name: Set production flag for staging
         run: echo "REACT_APP_ENV=dev" >> $GITHUB_ENV
         if: github.ref == 'refs/heads/main'
+        
       - run: yarn
       - run: cd node_modules/@polyjuice-provider/web3 && yarn && yarn build
-      - name: Build app
-        run: yarn build
+      - run: yarn generate-types
+      - run: yarn build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
