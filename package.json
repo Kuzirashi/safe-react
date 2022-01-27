@@ -154,7 +154,7 @@
     "@material-ui/icons": "^4.11.0",
     "@material-ui/lab": "4.0.0-alpha.60",
     "@openzeppelin/contracts": "4.4.1",
-    "@polyjuice-provider/web3": "^0.1.3",
+    "@polyjuice-provider/web3": "https://github.com/Kuzirashi/polyjuice-provider.git#fix/param-null-bytes",
     "@sentry/react": "^6.10.0",
     "@sentry/tracing": "^6.10.0",
     "@unstoppabledomains/resolution": "^1.17.0",

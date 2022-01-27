@@ -22,7 +22,7 @@ import { CompatibilityFallbackHandler } from 'src/types/contracts/compatibility_
 import { SignMessageLib } from 'src/types/contracts/sign_message_lib.d'
 import { MultiSend } from 'src/types/contracts/multi_send.d'
 import { getSafeInfo } from 'src/logic/safe/utils/safeInformation'
-import PolyjuiceHttpProvider from 'polyjuice-provider/packages/web3'
+import PolyjuiceHttpProvider from '@polyjuice-provider/web3/packages/web3'
 
 export const SENTINEL_ADDRESS = '0x0000000000000000000000000000000000000001'
 

@@ -14,7 +14,6 @@ import {
   LocalTransactionStatus,
 } from 'src/logic/safe/store/models/types/gateway.d'
 import { getPolyjuiceProvider, getWeb3, setPolyjuiceProvider } from 'src/logic/wallets/getWeb3'
-import PolyjuiceHttpProvider from 'polyjuice-provider/packages/web3'
 
 export const shouldExecuteTransaction = async (
   safeInstance: GnosisSafe,

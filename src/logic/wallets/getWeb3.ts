@@ -3,7 +3,8 @@ import Web3 from 'web3'
 import { provider as Provider } from 'web3-core'
 import { ContentHash } from 'web3-eth-ens'
 import Safe, { Web3Adapter } from '@gnosis.pm/safe-core-sdk'
-import { PolyjuiceHttpProvider, PolyjuiceAccounts } from 'polyjuice-provider/packages/web3'
+import { PolyjuiceHttpProvider, PolyjuiceAccounts } from '@polyjuice-provider/web3/packages/web3'
+
 import {
   getSafeSingletonDeployment,
   getSafeL2SingletonDeployment,
@@ -20,7 +21,7 @@ import { getRpcServiceUrl, _getChainId } from 'src/config'
 import { CHAIN_ID, ChainId } from 'src/config/chain.d'
 import { isValidCryptoDomainName } from 'src/logic/wallets/ethAddresses'
 import { getAddressFromUnstoppableDomain } from './utils/unstoppableDomains'
-import { PolyjuiceConfig } from 'polyjuice-provider/packages/base'
+import { PolyjuiceConfig } from '@polyjuice-provider/web3/packages/base'
 
 // This providers have direct relation with name assigned in bnc-onboard configuration
 export enum WALLET_PROVIDER {
