@@ -30,7 +30,7 @@ jobs:
       - name: Set production flag for staging
         run: echo "REACT_APP_ENV=dev" >> $GITHUB_ENV
         if: github.ref == 'refs/heads/main'
-
+      - run: yarn
       - name: Build app
         run: yarn build
 
