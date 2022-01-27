@@ -1,6 +1,5 @@
 name: Deploy
 
-# Run on pushes to main or PRs
 on:
   push:
     branches:
@@ -29,8 +28,8 @@ jobs:
       # Set production flag on staging
       - name: Set production flag for staging
         run: echo "REACT_APP_ENV=dev" >> $GITHUB_ENV
-        if: github.ref == 'refs/heads/main'
-        
+        if: github.ref == 'refs/heads/dev'
+
       - run: yarn
       - run: cd node_modules/@polyjuice-provider/web3 && yarn && yarn build
       - run: yarn generate-types
@@ -44,5 +43,5 @@ jobs:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: 'Deploy to S3: Staging'
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/dev'
         run: aws s3 sync build s3://${{ env.STAGING_BUCKET_NAME }}/app --delete
