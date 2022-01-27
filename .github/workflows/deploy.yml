@@ -41,7 +41,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      # Script to deploy to staging environment
       - name: 'Deploy to S3: Staging'
         if: github.ref == 'refs/heads/main'
         run: aws s3 sync build s3://${{ env.STAGING_BUCKET_NAME }}/app --delete
