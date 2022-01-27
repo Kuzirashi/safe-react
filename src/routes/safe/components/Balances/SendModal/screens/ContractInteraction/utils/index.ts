@@ -109,8 +109,10 @@ export const createTxObject = (
   contractAddress: string,
   values: Record<string, string>,
 ): ContractSendMethod => {
+  console.log('createTxObject')
   const web3 = getWeb3()
   const contract = new web3.eth.Contract([method], contractAddress)
+  ;(contract as any).setProvider(web3, web3.eth.accounts)
   const { inputs, name = '', signatureHash } = method
   const args = inputs?.map(extractMethodArgs(signatureHash, values)) || []
 

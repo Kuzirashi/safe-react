@@ -1,9 +1,15 @@
-import { getTransactionHistory, getTransactionQueue } from '@gnosis.pm/safe-react-gateway-sdk'
+import {
+  AddressEx,
+  getTransactionHistory,
+  getTransactionQueue,
+  TransactionListItem,
+} from '@gnosis.pm/safe-react-gateway-sdk'
 import { _getChainId } from 'src/config'
 import { HistoryGatewayResponse, QueuedGatewayResponse } from 'src/logic/safe/store/models/types/gateway.d'
 import { checksumAddress } from 'src/utils/checksumAddress'
 import { Errors, CodedException } from 'src/logic/exceptions/CodedException'
 import { GATEWAY_URL } from 'src/utils/constants'
+import { getPolyjuiceProvider, setPolyjuiceProvider } from 'src/logic/wallets/getWeb3'
 
 /*************/
 /*  HISTORY  */
@@ -96,10 +102,47 @@ export const loadPagedQueuedTransactions = async (
   }
 }
 
+export async function transformQueuedTransaction(transactions: TransactionListItem[]): Promise<TransactionListItem[]> {
+  const transformedTransactions: TransactionListItem[] = []
+
+  await setPolyjuiceProvider()
+  const web3Provider = getPolyjuiceProvider()
+
+  for (const tx of transactions as any) {
+    if (tx?.transaction?.executionInfo?.missingSigners) {
+      const ethAddressesSigners: AddressEx[] = []
+
+      for (const account of tx.transaction.executionInfo.missingSigners) {
+        try {
+          const shortAddress = await web3Provider.godwoker.getEthAddressByAllTypeShortAddress(account.value)
+
+          if (!shortAddress) {
+            throw new Error()
+          }
+
+          ethAddressesSigners.push({ value: checksumAddress(shortAddress), name: null, logoUri: null })
+        } catch (error) {
+          console.log(`[fetchSafeTransaction] Can't convert Ethereum address: ${account.value} to Godwoken address.`)
+        }
+      }
+
+      tx.transaction.executionInfo.missingSigners = ethAddressesSigners
+    }
+
+    transformedTransactions.push(tx)
+  }
+
+  return transformedTransactions
+}
+
 export const loadQueuedTransactions = async (safeAddress: string): Promise<QueuedGatewayResponse['results']> => {
   const chainId = _getChainId()
   try {
     const { results, next, previous } = await getTransactionQueue(GATEWAY_URL, chainId, checksumAddress(safeAddress))
+
+    console.log('XXXX loadQueuedTransactions', {
+      results,
+    })
 
     if (!queuedPointers[chainId]) {
       queuedPointers[chainId] = {}
@@ -108,8 +151,8 @@ export const loadQueuedTransactions = async (safeAddress: string): Promise<Queue
     if (!queuedPointers[chainId][safeAddress] || queuedPointers[chainId][safeAddress].next === null) {
       queuedPointers[chainId][safeAddress] = { next, previous }
     }
-
-    return results
+    // return results
+    return await transformQueuedTransaction(results)
   } catch (e) {
     throw new CodedException(Errors._603, e.message)
   }

@@ -15,7 +15,7 @@ import { extractSafeAddress } from 'src/routes/routes'
 import { OwnerForm } from './screens/OwnerForm'
 import { ReviewAddOwner } from './screens/Review'
 import { ThresholdForm } from './screens/ThresholdForm'
-import { getSafeSDK } from 'src/logic/wallets/getWeb3'
+import { getPolyjuiceProvider, getSafeSDK } from 'src/logic/wallets/getWeb3'
 import { Errors, logError } from 'src/logic/exceptions/CodedException'
 import { currentSafeCurrentVersion } from 'src/logic/safe/store/selectors'
 import { currentChainId } from 'src/logic/config/store/selectors'
@@ -36,11 +36,32 @@ export const sendAddOwner = async (
   connectedWalletAddress: string,
 ): Promise<void> => {
   const sdk = await getSafeSDK(connectedWalletAddress, safeAddress, safeVersion)
+  console.log('sendAddOwner', { ownerAddress: values.ownerAddress, threshold: +values.threshold })
+  const newOwnerGodwokenAddress = (
+    await getPolyjuiceProvider().godwoker.getShortAddressByAllTypeEthAddress(values.ownerAddress)
+  ).value
+  console.log('sendAddOwner', {
+    newOwnerGodwokenAddress,
+  })
   const safeTx = await sdk.getAddOwnerTx(
     { ownerAddress: values.ownerAddress, threshold: +values.threshold },
     { safeTxGas: 0 },
   )
-  const txData = safeTx.data.data
+  const txData = safeTx.data.data.replace(
+    values.ownerAddress.slice(2).toLowerCase(),
+    newOwnerGodwokenAddress.slice(2).toLowerCase(),
+  )
+
+  console.log('safeTx.data.data', {
+    safeAddress,
+    to: safeAddress,
+    valueInWei: '0',
+    txData,
+    txNonce: txParameters.safeNonce,
+    safeTxGas: txParameters.safeTxGas,
+    ethParameters: txParameters,
+    notifiedTransaction: TX_NOTIFICATION_TYPES.SETTINGS_CHANGE_TX,
+  })
 
   const txHash = await dispatch(
     createTransaction({

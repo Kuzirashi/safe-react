@@ -6,6 +6,7 @@ import { EMPTY_DATA } from 'src/logic/wallets/ethTransactions'
 import { TxArgs } from 'src/logic/safe/store/models/types/transaction'
 import { adjustV } from './utils'
 import { Operation } from '@gnosis.pm/safe-react-gateway-sdk'
+import { checksumAddress } from 'src/utils/checksumAddress'
 
 const EIP712_NOT_SUPPORTED_ERROR_MSG = "EIP712 is not supported by user's wallet"
 
@@ -108,6 +109,7 @@ export const generateTypedDataFrom = async ({
   const web3 = getWeb3()
   const networkId = await getChainIdFrom(web3)
   const eip712WithChainId = semverSatisfies(safeVersion, '>=1.3.0')
+  to = checksumAddress(to)
 
   const typedData = {
     types: getEip712MessageTypes(safeVersion),
@@ -129,6 +131,21 @@ export const generateTypedDataFrom = async ({
       nonce: Number(nonce),
     },
   }
+
+  console.log('generateTypedDataFrom', {
+    safeAddress,
+    safeVersion,
+    baseGas,
+    data,
+    gasPrice,
+    gasToken,
+    nonce,
+    operation,
+    refundReceiver,
+    safeTxGas,
+    to,
+    valueInWei,
+  })
 
   return typedData
 }

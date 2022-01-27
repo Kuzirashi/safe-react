@@ -23,6 +23,7 @@ export const CHAIN_ID: Record<ChainName, ChainId> = {
   LOCAL: '4447',
   ARBITRUM: '42161',
   AVALANCHE: '43114',
+  GODWOKEN_TESTNET: '71393',
   VOLTA: '73799',
 }
 

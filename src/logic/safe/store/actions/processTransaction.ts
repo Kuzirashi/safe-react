@@ -95,10 +95,13 @@ export const processTransaction =
     const isExecution = approveAndExecute || (await shouldExecuteTransaction(safeInstance, nonce, lastTx))
 
     const preApprovingOwner = approveAndExecute && !thresholdReached ? userAddress : undefined
-    let sigs = generateSignaturesFromTxConfirmations(tx.confirmations, preApprovingOwner)
+    let sigs = await generateSignaturesFromTxConfirmations(tx.confirmations, preApprovingOwner)
 
+    console.log('sigs before if sigs', {
+      sigs,
+    })
     if (!sigs) {
-      sigs = getPreValidatedSignatures(from)
+      sigs = await getPreValidatedSignatures(from)
     }
 
     const notificationsQueue = getNotificationsFromTxType(notifiedTransaction, tx.origin)
@@ -123,6 +126,11 @@ export const processTransaction =
       sigs,
     }
 
+    console.log('processTransaction', {
+      sigs,
+      txArgs,
+    })
+
     try {
       if (checkIfOffChainSignatureIsPossible(isExecution, smartContractWallet, safeVersion)) {
         const signature = await tryOffChainSigning(
@@ -144,13 +152,22 @@ export const processTransaction =
 
       transaction = isExecution ? getExecutionTransaction(txArgs) : getApprovalTransaction(safeInstance, tx.safeTxHash)
 
+      console.log('[processTransaction] ', {
+        transaction,
+        b: tx.safeTxHash,
+      })
+
       const sendParams: PayableTx = {
         from,
         value: 0,
-        gas: ethParameters?.ethGasLimit,
-        [getGasParam()]: ethParameters?.ethGasPriceInGWei,
+        gas: 6000000,
+        [getGasParam()]: '0x1' || ethParameters?.ethGasPriceInGWei,
         nonce: ethParameters?.ethNonce,
       }
+
+      console.log('[processTransaction]', {
+        sendParams,
+      })
 
       await transaction
         .send(sendParams)

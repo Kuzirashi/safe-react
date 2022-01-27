@@ -15,13 +15,14 @@ import { getChainById, _getChainId } from 'src/config'
 import { ChainId } from 'src/config/chain.d'
 import { ZERO_ADDRESS } from 'src/logic/wallets/ethAddresses'
 import { calculateGasOf, EMPTY_DATA } from 'src/logic/wallets/ethTransactions'
-import { getWeb3, getChainIdFrom } from 'src/logic/wallets/getWeb3'
+import { getWeb3, getChainIdFrom, setWeb3 } from 'src/logic/wallets/getWeb3'
 import { GnosisSafe } from 'src/types/contracts/gnosis_safe.d'
 import { ProxyFactory } from 'src/types/contracts/proxy_factory.d'
 import { CompatibilityFallbackHandler } from 'src/types/contracts/compatibility_fallback_handler.d'
 import { SignMessageLib } from 'src/types/contracts/sign_message_lib.d'
 import { MultiSend } from 'src/types/contracts/multi_send.d'
 import { getSafeInfo } from 'src/logic/safe/utils/safeInformation'
+import PolyjuiceHttpProvider from 'polyjuice-provider/packages/web3'
 
 export const SENTINEL_ADDRESS = '0x0000000000000000000000000000000000000001'
 
@@ -232,14 +233,33 @@ export const getMultisendContractAddress = () => {
   return multiSend.options.address
 }
 
-export const getSafeDeploymentTransaction = (
+export const getSafeDeploymentTransaction = async (
   safeAccounts: string[],
   numConfirmations: number,
   safeCreationSalt: number,
 ) => {
+  const safeAccountsGodwokenAddresses: string[] = [];
+  const web3Provider = getWeb3().currentProvider as any as PolyjuiceHttpProvider;
+
+  console.log('getSafeDeploymentTransaction', {
+    web3Provider
+  });
+
+  for (const account of safeAccounts) {
+    const shortAddress = await web3Provider.godwoker.getShortAddressByAllTypeEthAddress(account);
+
+    if (!shortAddress) {
+      throw new Error(`Can't convert Ethereum address: ${account} to Godwoken address.`);
+    }
+
+    safeAccountsGodwokenAddresses.push(
+      shortAddress.value
+    );
+  }
+
   const gnosisSafeData = safeMaster.methods
     .setup(
-      safeAccounts,
+      safeAccountsGodwokenAddresses,
       numConfirmations,
       ZERO_ADDRESS,
       EMPTY_DATA,
@@ -249,6 +269,16 @@ export const getSafeDeploymentTransaction = (
       ZERO_ADDRESS,
     )
     .encodeABI()
+
+  console.log('getSafeDeploymentTransaction', {
+    'safeMaster.options.address': safeMaster.options.address,
+    gnosisSafeData,
+    safeCreationSalt,
+    safeAccounts,
+    safeAccountsGodwokenAddresses
+  });
+
+  // return {} as any;
   return proxyFactoryMaster.methods.createProxyWithNonce(safeMaster.options.address, gnosisSafeData, safeCreationSalt)
 }
 
@@ -258,7 +288,7 @@ export const estimateGasForDeployingSafe = async (
   userAccount: string,
   safeCreationSalt: number,
 ) => {
-  const proxyFactoryData = getSafeDeploymentTransaction(safeAccounts, numConfirmations, safeCreationSalt).encodeABI()
+  const proxyFactoryData = (await getSafeDeploymentTransaction(safeAccounts, numConfirmations, safeCreationSalt)).encodeABI()
 
   return calculateGasOf({
     data: proxyFactoryData,
@@ -271,5 +301,14 @@ export const getGnosisSafeInstanceAt = (safeAddress: string, safeVersion: string
   const safeSingletonDeployment = getSafeContractDeployment({ safeVersion })
 
   const web3 = getWeb3()
-  return new web3.eth.Contract(safeSingletonDeployment?.abi as AbiItem[], safeAddress) as unknown as GnosisSafe
+  // console.log('getGnosisSafeInstanceAt', {
+  //   web3
+  // });
+  // console.log('X!!!!!!!!!!!!!!!', {
+  //   safeAddress
+  // });
+  const contract = new web3.eth.Contract(safeSingletonDeployment?.abi as AbiItem[], safeAddress) as unknown as GnosisSafe;
+  // ;(web3 as any).eth.accounts = new PolyjuiceAccounts(polyjuiceConfig)
+  // (contract as any).setProvider(web3, web3.eth.accounts)
+  return contract;
 }

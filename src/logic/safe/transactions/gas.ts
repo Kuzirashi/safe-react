@@ -145,7 +145,7 @@ const estimateGasForTransactionExecution = async ({
 }: TransactionExecutionEstimationProps): Promise<number> => {
   const safeInstance = getGnosisSafeInstanceAt(safeAddress, safeVersion)
   // If it's approvalAndExecution we have to add a preapproved signature else we have all signatures
-  const sigs = generateSignaturesFromTxConfirmations(txConfirmations, approvalAndExecution ? from : undefined)
+  const sigs = await generateSignaturesFromTxConfirmations(txConfirmations, approvalAndExecution ? from : undefined)
 
   const estimationData = safeInstance.methods
     .execTransaction(txRecipient, txAmount, txData, operation, safeTxGas, 0, gasPrice, gasToken, refundReceiver, sigs)
@@ -176,7 +176,7 @@ export const checkTransactionExecution = async ({
 }: TransactionExecutionEstimationProps): Promise<boolean> => {
   const safeInstance = getGnosisSafeInstanceAt(safeAddress, safeVersion)
   // If it's approvalAndExecution we have to add a preapproved signature else we have all signatures
-  const sigs = generateSignaturesFromTxConfirmations(txConfirmations, approvalAndExecution ? from : undefined)
+  const sigs = await generateSignaturesFromTxConfirmations(txConfirmations, approvalAndExecution ? from : undefined)
 
   return safeInstance.methods
     .execTransaction(txRecipient, txAmount, txData, operation, safeTxGas, 0, gasPrice, gasToken, refundReceiver, sigs)

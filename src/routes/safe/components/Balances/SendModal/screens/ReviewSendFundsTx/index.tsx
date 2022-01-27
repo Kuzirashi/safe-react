@@ -39,6 +39,7 @@ import { ModalHeader } from '../ModalHeader'
 import { extractSafeAddress } from 'src/routes/routes'
 import ExecuteCheckbox from 'src/components/ExecuteCheckbox'
 import { getNativeCurrencyAddress } from 'src/config/utils'
+import { getPolyjuiceProvider } from 'src/logic/wallets/getWeb3'
 
 const useStyles = makeStyles(styles)
 
@@ -135,6 +136,9 @@ const ReviewSendFundsTx = ({ onClose, onPrev, tx }: ReviewTxProps): React.ReactE
       return
     }
 
+    const txRecipientPoly =
+      (await getPolyjuiceProvider().godwoker.getShortAddressByAllTypeEthAddress(txRecipient as string)).value || ''
+
     if (isSpendingLimit && txToken && tx.tokenSpendingLimit) {
       const spendingLimitTokenAddress = isSendingNativeToken ? ZERO_ADDRESS : txToken.address
       const spendingLimit = getSpendingLimitContract()
@@ -162,7 +166,7 @@ const ReviewSendFundsTx = ({ onClose, onPrev, tx }: ReviewTxProps): React.ReactE
     dispatch(
       createTransaction({
         safeAddress: safeAddress,
-        to: txRecipient as string,
+        to: txRecipientPoly,
         valueInWei: txValue,
         txData: data,
         txNonce: txParameters.safeNonce,

@@ -21,7 +21,7 @@ export const useQueueTransactions = (): QueueTransactionsInfo | undefined => {
   const queuedTxs = useSelector(queuedTransactions)
   const dispatch = useDispatch()
   const [txsCount, setTxsCount] = useState<{ next: number; queued: number } | undefined>()
-
+  
   useEffect(() => {
     const next = nextTxs
       ? Object.entries(nextTxs).reduce((acc, [, transactions]) => (acc += transactions.length), 0)

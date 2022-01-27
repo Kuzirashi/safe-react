@@ -94,22 +94,23 @@ const TxSingularDetails = (): ReactElement => {
   // Add the tx to the store
   useEffect(() => {
     if (!fetchedTx) return
-
-    // Format the tx details into a History or Queue-like tx item
-    const listItemTx = makeTxFromDetails(fetchedTx)
-    const payload: HistoryPayload | QueuedPayload = {
-      chainId,
-      safeAddress: extractSafeAddress(),
-      values: [
-        {
-          transaction: listItemTx,
-          type: 'TRANSACTION', // Other types are discarded in reducer
-          conflictType: 'None', // Not used in reducer
-        },
-      ],
-    }
-    // And add it to the corresponding list in the store
-    dispatch(isTxQueued(listItemTx.txStatus) ? addQueuedTransactions(payload) : addHistoryTransactions(payload))
+    ;(async () => {
+      // Format the tx details into a History or Queue-like tx item
+      const listItemTx = await makeTxFromDetails(fetchedTx)
+      const payload: HistoryPayload | QueuedPayload = {
+        chainId,
+        safeAddress: extractSafeAddress(),
+        values: [
+          {
+            transaction: listItemTx,
+            type: 'TRANSACTION', // Other types are discarded in reducer
+            conflictType: 'None', // Not used in reducer
+          },
+        ],
+      }
+      // And add it to the corresponding list in the store
+      dispatch(isTxQueued(listItemTx.txStatus) ? addQueuedTransactions(payload) : addHistoryTransactions(payload))
+    })()
   }, [fetchedTx, chainId, dispatch])
 
   if (!liveTx) {

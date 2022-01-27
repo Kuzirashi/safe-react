@@ -1,7 +1,7 @@
 import { ReactElement } from 'react'
 import Button from 'src/components/layout/Button'
 import { _getChainId } from 'src/config'
-import { getWeb3 } from 'src/logic/wallets/getWeb3'
+import { getWeb3Ethereum } from 'src/logic/wallets/getWeb3'
 import onboard from 'src/logic/wallets/onboard'
 import { shouldSwitchNetwork, switchNetwork } from 'src/logic/wallets/utils/network'
 
@@ -17,7 +17,7 @@ export const onboardUser = async (): Promise<boolean> => {
   // before calling walletSelect you want to check if web3 has been instantiated
   // which indicates that a wallet has already been selected
   // and web3 has been instantiated with that provider
-  const web3 = getWeb3()
+  const web3 = getWeb3Ethereum()
   const walletSelected = web3 ? true : await onboard().walletSelect()
   return walletSelected && checkWallet()
 }

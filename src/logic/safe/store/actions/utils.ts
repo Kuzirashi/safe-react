@@ -7,12 +7,14 @@ import { buildModulesLinkedList } from 'src/logic/safe/utils/modules'
 import { enabledFeatures, safeNeedsUpdate } from 'src/logic/safe/utils/safeVersion'
 import { checksumAddress } from 'src/utils/checksumAddress'
 import { ChainId } from 'src/config/chain.d'
-import { SafeInfo } from '@gnosis.pm/safe-react-gateway-sdk'
+import { AddressEx, SafeInfo } from '@gnosis.pm/safe-react-gateway-sdk'
 import {
   Transaction,
   isMultisigExecutionInfo,
   LocalTransactionStatus,
 } from 'src/logic/safe/store/models/types/gateway.d'
+import { getPolyjuiceProvider, getWeb3, setPolyjuiceProvider } from 'src/logic/wallets/getWeb3'
+import PolyjuiceHttpProvider from 'polyjuice-provider/packages/web3'
 
 export const shouldExecuteTransaction = async (
   safeInstance: GnosisSafe,
@@ -71,6 +73,12 @@ export const extractRemoteSafeInfo = async (remoteSafeInfo: SafeInfo): Promise<P
     }
   }
 
+  // console.log('safeInfo.currentVersion = remoteSafeInfo.version', {
+  //   a: safeInfo.currentVersion,
+  //   b: remoteSafeInfo.version,
+  //   remoteSafeInfo,
+  // })
+
   safeInfo.nonce = remoteSafeInfo.nonce
   safeInfo.threshold = remoteSafeInfo.threshold
   safeInfo.currentVersion = remoteSafeInfo.version
@@ -92,14 +100,35 @@ export const extractRemoteSafeInfo = async (remoteSafeInfo: SafeInfo): Promise<P
  * @param {SafeRecordProps['owners'] | undefined} localSafeOwners
  * @returns SafeRecordProps['owners'] | undefined
  */
-export const buildSafeOwners = (
+export const buildSafeOwners = async (
   remoteSafeOwners?: SafeInfo['owners'],
   localSafeOwners?: SafeRecordProps['owners'],
-): SafeRecordProps['owners'] | undefined => {
+): Promise<SafeRecordProps['owners'] | undefined> => {
   if (remoteSafeOwners) {
+    const safeAccountsGodwokenAddresses: string[] = []
+    await setPolyjuiceProvider()
+    const web3Provider = getPolyjuiceProvider()
+
+    for (const account of remoteSafeOwners) {
+      // console.log('account.value', account.value)
+      try {
+        const shortAddress = await web3Provider.godwoker.getEthAddressByAllTypeShortAddress(account.value)
+
+        if (!shortAddress) {
+          throw new Error()
+        }
+
+        safeAccountsGodwokenAddresses.push(checksumAddress(shortAddress))
+      } catch (error) {
+        console.log(
+          `[buildSafeOwners] Can't convert Ethereum address: ${account.value} to Godwoken address. Skipping from owners array.`,
+        )
+      }
+    }
+
     // ToDo: review if checksums addresses is necessary,
     //  as they must be provided already in the checksum form from the services
-    return remoteSafeOwners.map(({ value }) => checksumAddress(value))
+    return safeAccountsGodwokenAddresses
   }
 
   // nothing to do without remote owners, so we return the stored list

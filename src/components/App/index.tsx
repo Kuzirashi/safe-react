@@ -10,7 +10,6 @@ import ErrorIcon from 'src/assets/icons/error.svg'
 import InfoIcon from 'src/assets/icons/info.svg'
 import AppLayout from 'src/components/AppLayout'
 import { SafeListSidebar, SafeListSidebarContext } from 'src/components/SafeListSidebar'
-import CookiesBanner from 'src/components/CookiesBanner'
 import Notifier from 'src/components/Notifier'
 import Img from 'src/components/layout/Img'
 import { currentSafeWithNames } from 'src/logic/safe/store/selectors'
@@ -136,7 +135,6 @@ const App: React.FC = ({ children }) => {
           )}
         </>
       </SnackbarProvider>
-      <CookiesBanner />
     </Frame>
   )
 }

@@ -73,6 +73,7 @@ const ContractInteraction: React.FC<ContractInteractionProps> = ({
   ): Promise<void | Record<string, string>> => {
     if (value || (contractAddress && selectedMethod)) {
       try {
+        console.log('handleSubmit createTxObject');
         const txObject = createTxObject(selectedMethod, contractAddress, values)
         const data = txObject.encodeABI()
 

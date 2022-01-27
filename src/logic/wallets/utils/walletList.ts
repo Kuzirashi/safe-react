@@ -10,7 +10,10 @@ type Wallet = WalletInitOptions & {
 }
 
 const wallets = (): Wallet[] => {
-  const rpcUrl = getRpcServiceUrl()
+  const rpcUrl = getRpcServiceUrl() || 'https://rinkeby-light.eth.linkpool.io/'
+  console.log(`rpcUrl wallets`, {
+    rpcUrl,
+  })
   const chainId = _getChainId()
 
   return [

@@ -200,6 +200,7 @@ const AppFrame = ({ appUrl }: Props): ReactElement => {
       const params = msg.data.params as RPCPayload
 
       try {
+        console.log('AppFrame Methods.rpcCall');
         const response = new Promise<MethodToResponse['rpcCall']>((resolve, reject) => {
           safeAppWeb3Provider.send(
             {

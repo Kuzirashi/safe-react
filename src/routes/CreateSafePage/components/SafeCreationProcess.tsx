@@ -79,14 +79,14 @@ function SafeCreationProcess(): ReactElement {
     setSafeCreationTxHash(safeCreationFormValues[FIELD_NEW_SAFE_CREATION_TX_HASH])
 
     setCreationTxPromise(
-      new Promise((resolve, reject) => {
+      new Promise(async (resolve, reject) => {
         const confirmations = safeCreationFormValues[FIELD_NEW_SAFE_THRESHOLD]
         const ownerFields = safeCreationFormValues[FIELD_SAFE_OWNERS_LIST]
         const ownerAddresses = ownerFields.map(({ addressFieldName }) => safeCreationFormValues[addressFieldName])
         const safeCreationSalt = safeCreationFormValues[FIELD_NEW_SAFE_PROXY_SALT]
         const gasLimit = safeCreationFormValues[FIELD_NEW_SAFE_GAS_LIMIT]
         const gasPrice = safeCreationFormValues[FIELD_NEW_SAFE_GAS_PRICE]
-        const deploymentTx = getSafeDeploymentTransaction(ownerAddresses, confirmations, safeCreationSalt)
+        const deploymentTx = await getSafeDeploymentTransaction(ownerAddresses, confirmations, safeCreationSalt)
 
         deploymentTx
           .send({

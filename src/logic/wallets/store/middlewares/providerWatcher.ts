@@ -1,10 +1,11 @@
 import closeSnackbar from 'src/logic/notifications/store/actions/closeSnackbar'
-import { getProviderInfo, getWeb3 } from 'src/logic/wallets/getWeb3'
+import { getProviderInfo, getWeb3Ethereum } from 'src/logic/wallets/getWeb3'
 import { fetchProvider } from 'src/logic/wallets/store/actions'
 import { ADD_PROVIDER } from 'src/logic/wallets/store/actions/addProvider'
 import { REMOVE_PROVIDER } from 'src/logic/wallets/store/actions/removeProvider'
 
 import { loadFromStorage, removeFromStorage, saveToStorage } from 'src/utils/storage'
+import { ProviderProps } from '../model/provider'
 
 const watchedActions = [ADD_PROVIDER, REMOVE_PROVIDER]
 
@@ -31,8 +32,13 @@ const providerWatcherMware = (store) => (next) => async (action) => {
 
         saveToStorage(LAST_USED_PROVIDER_KEY, currentProviderProps.name)
 
+        let lastProviderInfo: ProviderProps | null = null
         watcherInterval = setInterval(async () => {
-          const web3 = getWeb3()
+          if (lastProviderInfo?.polyjuiceAccount) {
+            clearInterval(watcherInterval)
+          }
+
+          const web3 = getWeb3Ethereum()
           const providerInfo = await getProviderInfo(web3)
 
           const networkChanged = currentProviderProps.network !== providerInfo.network
@@ -44,7 +50,9 @@ const providerWatcherMware = (store) => (next) => async (action) => {
           if (currentProviderProps.account !== providerInfo.account || networkChanged) {
             store.dispatch(fetchProvider(currentProviderProps.name))
           }
-        }, 2000)
+
+          lastProviderInfo = providerInfo
+        }, 3000)
 
         break
       }

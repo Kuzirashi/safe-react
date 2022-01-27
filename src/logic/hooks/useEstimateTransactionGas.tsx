@@ -108,7 +108,7 @@ const getDefaultGasEstimation = (
     gasCostFormatted: '< 0.001',
     gasPrice,
     gasPriceFormatted,
-    gasLimit: '0',
+    gasLimit: '6000000',
     isExecution,
     isCreation,
     isOffChainSignature,
@@ -193,7 +193,8 @@ export const useEstimateTransactionGas = ({
 
         const gasPrice = manualGasPrice ? toWei(manualGasPrice, 'gwei') : await calculateGasPrice()
         const gasPriceFormatted = fromWei(gasPrice, 'gwei')
-        const gasLimit = manualGasLimit || ethGasLimitEstimation.toString()
+        let gasLimit = manualGasLimit || ethGasLimitEstimation.toString()
+        gasLimit = gasLimit === '0' ? '6000000' : gasLimit
         const estimatedGasCosts = parseInt(gasLimit, 10) * parseInt(gasPrice, 10)
         const gasCost = fromTokenUnit(estimatedGasCosts, nativeCurrency.decimals)
         const gasCostFormatted = formatAmount(gasCost)

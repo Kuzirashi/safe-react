@@ -12,6 +12,11 @@ export const userAccountSelector = createSelector(providerSelector, (provider: P
   return account || ''
 })
 
+export const polyjuiceAccountSelector = createSelector(providerSelector, (provider: ProviderState): string => {
+  const account = provider.get('polyjuiceAccount')
+  return account || ''
+})
+
 export const providerNameSelector = createSelector(providerSelector, (provider: ProviderState): string | undefined => {
   const name = provider.get('name')
   return name ? name.toLowerCase() : undefined

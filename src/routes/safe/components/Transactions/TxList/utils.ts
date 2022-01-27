@@ -23,7 +23,9 @@ import {
 } from 'src/logic/safe/store/models/types/gateway.d'
 import { formatAmount } from 'src/logic/tokens/utils/formatAmount'
 import { sameAddress } from 'src/logic/wallets/ethAddresses'
+import { getPolyjuiceProvider, setPolyjuiceProvider } from 'src/logic/wallets/getWeb3'
 import { SAFE_ROUTES, TRANSACTION_ID_SLUG, history } from 'src/routes/routes'
+import { checksumAddress } from 'src/utils/checksumAddress'
 
 export const NOT_AVAILABLE = 'n/a'
 interface AmountData {
@@ -111,8 +113,17 @@ export const isCancelTxDetails = (txInfo: Transaction['txInfo']): boolean =>
 
 export const addressInList =
   (list: AddressEx[] = []) =>
-  (address: string): boolean =>
-    list.some((ownerAddress) => sameAddress(ownerAddress.value, address))
+  (address: string): boolean => {
+    if (list && list.length > 0 && typeof list[0].value === 'undefined') {
+      throw new Error('[addressInList] list has to be of type AddressEx[]')
+    }
+    // console.log('addressInList', {
+    //   a: list,
+    //   b: address,
+    //   c: list.some((ownerAddress) => sameAddress(ownerAddress.value, address)),
+    // })
+    return list.some((ownerAddress) => sameAddress(ownerAddress.value, address))
+  }
 
 export const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressEx | undefined => {
   switch (txInfo.type) {
@@ -132,11 +143,39 @@ export const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressEx | un
 }
 
 // Our store does not match the details returned from the endpoint
-export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction => {
+export const makeTxFromDetails = async (txDetails: TransactionDetails): Promise<Transaction> => {
+  // if (txDetails.detailedExecutionInfo) {
+  //   const ethAddressesSigners: string[] = []
+
+  //   await setPolyjuiceProvider()
+  //   const web3Provider = getPolyjuiceProvider()
+
+  //   for (const account of (txDetails as any).detailedExecutionInfo.signers) {
+  //     try {
+  //       const shortAddress = await web3Provider.godwoker.getEthAddressByAllTypeShortAddress(account.value)
+
+  //       if (!shortAddress) {
+  //         throw new Error()
+  //       }
+
+  //       ethAddressesSigners.push(checksumAddress(shortAddress))
+  //     } catch (error) {
+  //       console.log(`[makeTxFromDetails] Can't convert Ethereum address: ${account.value} to Godwoken address.`)
+  //     }
+  //   }
+
+  //   ;(txDetails as any).detailedExecutionInfo.signers = ethAddressesSigners
+  // }
+
   const getMissingSigners = ({
     signers,
     confirmations,
   }: MultisigExecutionDetails): MultisigExecutionInfo['missingSigners'] => {
+    console.log('getMissingSigners', {
+      signers,
+      confirmations,
+      txDetails,
+    })
     const missingSigners = signers.filter(({ value }) => {
       const hasConfirmed = confirmations?.some(({ signer }) => signer?.value === value)
       return !hasConfirmed
@@ -180,6 +219,10 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction =>
     safeAppInfo: txDetails?.safeAppInfo || undefined,
     txDetails,
   }
+
+  console.log('returned XXX tx', {
+    tx,
+  })
 
   return tx
 }

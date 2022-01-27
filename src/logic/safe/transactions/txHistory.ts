@@ -4,6 +4,8 @@ import { _getChainId } from 'src/config'
 import { checksumAddress } from 'src/utils/checksumAddress'
 import { proposeTransaction, TransactionDetails } from '@gnosis.pm/safe-react-gateway-sdk'
 import { GATEWAY_URL } from 'src/utils/constants'
+import { generateSafeTxHash } from '../store/actions/transactions/utils/transactionHelpers'
+import { getPolyjuiceProvider } from 'src/logic/wallets/getWeb3'
 
 const calculateBodyFrom = async (
   safeInstance: GnosisSafe,
@@ -25,6 +27,24 @@ const calculateBodyFrom = async (
     .getTransactionHash(to, valueInWei, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce)
     .call()
 
+  console.log('calculateBodyFrom safeTxHash', {
+    to,
+    valueInWei,
+    data,
+    operation,
+    safeTxGas,
+    baseGas,
+    gasPrice,
+    gasToken,
+    refundReceiver,
+    nonce,
+    safeTxHash,
+  })
+
+  const web3Provider = getPolyjuiceProvider()
+
+  const shortAddress = await web3Provider.godwoker.getShortAddressByAllTypeEthAddress(sender)
+
   return {
     to: checksumAddress(to),
     value: valueInWei,
@@ -37,7 +57,7 @@ const calculateBodyFrom = async (
     gasToken,
     refundReceiver,
     safeTxHash,
-    sender: checksumAddress(sender),
+    sender: checksumAddress(shortAddress.value),
     origin,
     signature,
   }

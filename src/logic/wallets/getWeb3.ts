@@ -3,6 +3,15 @@ import Web3 from 'web3'
 import { provider as Provider } from 'web3-core'
 import { ContentHash } from 'web3-eth-ens'
 import Safe, { Web3Adapter } from '@gnosis.pm/safe-core-sdk'
+import { PolyjuiceHttpProvider, PolyjuiceAccounts } from 'polyjuice-provider/packages/web3'
+import {
+  getSafeSingletonDeployment,
+  getSafeL2SingletonDeployment,
+  getProxyFactoryDeployment,
+  getFallbackHandlerDeployment,
+  getMultiSendCallOnlyDeployment,
+  getSignMessageLibDeployment,
+} from '@gnosis.pm/safe-deployments'
 
 import { sameAddress, ZERO_ADDRESS } from './ethAddresses'
 import { EMPTY_DATA } from './ethTransactions'
@@ -11,6 +20,7 @@ import { getRpcServiceUrl, _getChainId } from 'src/config'
 import { CHAIN_ID, ChainId } from 'src/config/chain.d'
 import { isValidCryptoDomainName } from 'src/logic/wallets/ethAddresses'
 import { getAddressFromUnstoppableDomain } from './utils/unstoppableDomains'
+import { PolyjuiceConfig } from 'polyjuice-provider/packages/base'
 
 // This providers have direct relation with name assigned in bnc-onboard configuration
 export enum WALLET_PROVIDER {
@@ -39,6 +49,7 @@ const httpProviderOptions = {
 
 const web3ReadOnly: Web3[] = []
 export const getWeb3ReadOnly = (): Web3 => {
+  console.log('getWeb3ReadOnly')
   const chainId = _getChainId()
   if (!web3ReadOnly[chainId]) {
     web3ReadOnly[chainId] = new Web3(
@@ -52,14 +63,58 @@ export const getWeb3ReadOnly = (): Web3 => {
 }
 
 let web3: Web3
+let web3Ethereum: Web3
+let polyjuiceProvider: PolyjuiceHttpProvider
+const polyjuiceConfig: PolyjuiceConfig = {
+  web3Url: 'https://godwoken-testnet-web3-rpc.ckbapp.dev',
+  ethAccountLockCodeHash: '0xdeec13a7b8e100579541384ccaf4b5223733e4a5483c3aec95ddc4c1d5ea5b22',
+}
 export const getWeb3 = (): Web3 => web3
-export const setWeb3 = (provider: Provider): void => {
-  web3 = new Web3(provider)
+export const getWeb3Ethereum = (): Web3 => web3Ethereum
+export const getPolyjuiceProvider = (): PolyjuiceHttpProvider => polyjuiceProvider
+export const setPolyjuiceProvider = async (): Promise<void> => {
+  if (polyjuiceProvider) {
+    return
+  }
+
+  polyjuiceProvider = new PolyjuiceHttpProvider(polyjuiceConfig.web3Url as string, polyjuiceConfig)
+
+  polyjuiceProvider.setMultiAbi([
+    (getSafeSingletonDeployment() as any).abi.filter((i) => !['getOwners', 'getTransactionHash'].includes(i.name)),
+    (getSafeL2SingletonDeployment() as any).abi.filter((i) => !['getOwners', 'getTransactionHash'].includes(i.name)),
+    (getProxyFactoryDeployment() as any).abi,
+    (getFallbackHandlerDeployment() as any).abi,
+    (getMultiSendCallOnlyDeployment() as any).abi,
+    (getSignMessageLibDeployment() as any).abi,
+  ])
+
+  await polyjuiceProvider.godwoker.init()
+}
+export const setWeb3Ethereum = (provider: Provider): void => {
+  web3Ethereum = new Web3(provider)
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const setWeb3 = async (provider?: Provider): Promise<void> => {
+  if (provider) {
+    setWeb3Ethereum(provider)
+  }
+
+  await setPolyjuiceProvider()
+  const godwokenProvider = getPolyjuiceProvider()
+
+  console.log({ godwokenProvider })
+
+  web3 = new Web3(godwokenProvider)
+  const polyjuiceAccounts = new PolyjuiceAccounts(polyjuiceConfig)
+  await polyjuiceAccounts.godwoker.init()
+  ;(web3 as any).eth.accounts = new PolyjuiceAccounts(polyjuiceConfig)
+  ;(web3 as any).eth.Contract.setProvider(godwokenProvider, web3.eth.accounts)
 }
 export const setWeb3ReadOnly = (): void => {
   web3 = getWeb3ReadOnly()
 }
 export const resetWeb3 = (): void => {
+  console.log('resetWeb3')
   web3 = web3ReadOnly[_getChainId()]
 }
 
@@ -90,6 +145,13 @@ export const isSmartContractWallet = async (web3Provider: Web3, account: string)
 
 export const getProviderInfo = async (web3Instance: Web3, providerName = 'Wallet'): Promise<ProviderProps> => {
   const account = (await getAccountFrom(web3Instance)) || ''
+  console.log('getProviderInfo', {
+    account,
+  })
+
+  await new Promise((r) => setTimeout(r, 2000))
+  const polyjuiceAccount =
+    (await getPolyjuiceProvider().godwoker.getShortAddressByAllTypeEthAddress(account)).value || ''
   const network = await getChainIdFrom(web3Instance)
   const smartContractWallet = await isSmartContractWallet(web3Instance, account)
   const hardwareWallet = isHardwareWallet(providerName)
@@ -100,6 +162,7 @@ export const getProviderInfo = async (web3Instance: Web3, providerName = 'Wallet
     available,
     loaded: true,
     account,
+    polyjuiceAccount,
     network: network.toString() as ChainId,
     smartContractWallet,
     hardwareWallet,

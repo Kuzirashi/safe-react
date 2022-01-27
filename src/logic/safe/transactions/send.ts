@@ -27,6 +27,9 @@ export const getTransactionHash = async ({
 
 export const getApprovalTransaction = (safeInstance: GnosisSafe, txHash: string): NonPayableTransactionObject<void> => {
   try {
+    console.log('!!!!!!! getApprovalTransaction', {
+      txHash,
+    })
     return safeInstance.methods.approveHash(txHash)
   } catch (err) {
     console.error(`Error while approving transaction: ${err}`)
@@ -48,6 +51,18 @@ export const getExecutionTransaction = ({
   valueInWei,
 }: TxArgs): NonPayableTransactionObject<boolean> => {
   try {
+    console.log('getExecutionTransaction', safeInstance, safeInstance.methods.execTransaction, {
+      to,
+      valueInWei,
+      data,
+      operation,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken,
+      refundReceiver,
+      sigs,
+    })
     return safeInstance.methods.execTransaction(
       to,
       valueInWei,

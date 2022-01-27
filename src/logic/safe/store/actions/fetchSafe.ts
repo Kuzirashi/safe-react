@@ -41,7 +41,7 @@ export const buildSafe = async (safeAddress: string): Promise<SafeRecordProps> =
   const localSafeInfo = local || ({} as Partial<SafeRecordProps>)
 
   // update owner's information
-  const owners = buildSafeOwners(remote?.owners, localSafeInfo.owners)
+  const owners = await buildSafeOwners(remote?.owners, localSafeInfo.owners)
 
   return { ...localSafeInfo, ...safeInfo, ...remoteSafeInfo, owners } as SafeRecordProps
 }
@@ -102,7 +102,7 @@ export const fetchSafe =
       }
     }
 
-    const owners = buildSafeOwners(remoteSafeInfo?.owners)
+    const owners = await buildSafeOwners(remoteSafeInfo?.owners)
 
     return dispatch(updateSafe({ address, ...safeInfo, owners }))
   }

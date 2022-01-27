@@ -42,6 +42,10 @@ export const usePagedQueuedTransactions = (): PagedQueuedTransactions => {
 
     const { values, next } = results
 
+    console.log({
+      values,
+    })
+
     if (next === null) {
       setHasMore(false)
     }

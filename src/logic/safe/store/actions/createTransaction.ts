@@ -100,8 +100,8 @@ export const createTransaction =
   async (dispatch: Dispatch, getState: () => AppReduxState): Promise<DispatchReturn> => {
     const state = getState()
 
-    const ready = await onboardUser()
-    if (!ready) return
+    // const ready = await onboardUser()
+    // if (!ready) return
 
     const { account: from, hardwareWallet, smartContractWallet } = providerSelector(state)
     const safeVersion = currentSafeCurrentVersion(state) as string
@@ -122,16 +122,17 @@ export const createTransaction =
     let safeTxGas = safeTxGasArg || '0'
     try {
       if (safeTxGasArg === undefined) {
-        safeTxGas = await estimateSafeTxGas(
-          { safeAddress, txData, txRecipient: to, txAmount: valueInWei, operation },
-          safeVersion,
-        )
+        // safeTxGas = await estimateSafeTxGas(
+        //   { safeAddress, txData, txRecipient: to, txAmount: valueInWei, operation },
+        //   safeVersion,
+        // )
+        safeTxGas = '1000000'
       }
     } catch (error) {
       safeTxGas = safeTxGasArg || '0'
     }
 
-    const sigs = getPreValidatedSignatures(from)
+    const sigs = await getPreValidatedSignatures(from)
     const notificationsQueue = getNotificationsFromTxType(notifiedTransaction, origin)
     const beforeExecutionKey = dispatch(enqueueSnackbar(notificationsQueue.beforeExecution))
 
@@ -176,16 +177,30 @@ export const createTransaction =
           return
         }
       }
-
       const tx = isExecution ? getExecutionTransaction(txArgs) : getApprovalTransaction(safeInstance, safeTxHash)
       const sendParams: PayableTx = {
         from,
         value: 0,
         gas: ethParameters?.ethGasLimit,
-        [getGasParam()]: ethParameters?.ethGasPriceInGWei,
+        [getGasParam()]: '0x0' || ethParameters?.ethGasPriceInGWei,
         nonce: ethParameters?.ethNonce,
       }
 
+      console.log({
+        isExecution,
+        tx,
+        sendParams,
+      })
+
+      // const r = await tx.call({
+      //   from,
+      //   gas: ethParameters?.ethGasLimit,
+      //   gasPrice: '0',
+      // })
+
+      // console.log({
+      //   r,
+      // })
       await tx
         .send(sendParams)
         .once('transactionHash', async (hash) => {
@@ -219,6 +234,7 @@ export const createTransaction =
           return receipt.transactionHash
         })
     } catch (err) {
+      // throw err
       logError(Errors._803, err.message)
       onError?.()
 

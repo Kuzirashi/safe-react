@@ -83,6 +83,15 @@ export const useActionButtonsHandlers = (transaction: Transaction): ActionButton
     (transaction.executionInfo as MultisigExecutionInfo)?.missingSigners ?? undefined,
   )
 
+  // console.log('disabledActions', {
+  //   currentUser,
+  //   isPending,
+  //   txStatus,
+  //   locContext: locationContext.txLocation,
+  //   signaturePending: signaturePending(currentUser),
+  //   missingSigners: (transaction.executionInfo as MultisigExecutionInfo)?.missingSigners,
+  // })
+
   const disabledActions =
     !currentUser ||
     isPending ||

@@ -7,6 +7,7 @@ export type ProviderProps = {
   loaded: boolean
   available: boolean
   account: string
+  polyjuiceAccount: string
   network: ChainId
   smartContractWallet: boolean
   hardwareWallet: boolean
@@ -17,6 +18,7 @@ export const makeProvider = Record<ProviderProps>({
   loaded: false,
   available: false,
   account: '',
+  polyjuiceAccount: '',
   network: CHAIN_ID.UNKNOWN,
   smartContractWallet: false,
   hardwareWallet: false,
