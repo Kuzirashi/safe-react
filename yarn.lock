@@ -2130,9 +2130,9 @@
   resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-deployments/-/safe-deployments-1.5.0.tgz#5e01ccc2e2d78bf91ecb4453a64d1cac3a5ba2d6"
   integrity sha512-IDU7I+IQr1zUU94/uD8shDVI+/nUA1unQUg8jtbTG0YGcmm49Lu8G01rqtWt2mhLxZWzFsgbLWGnU+/BzUqk7g==
 
-"@gnosis.pm/safe-deployments@https://github.com/Kuzirashi/safe-deployments.git#f3c3d9760b3d477a65bc5b718d9682574d4a7323":
+"@gnosis.pm/safe-deployments@https://github.com/Kuzirashi/safe-deployments.git#eab2f53e9a53cf79c485f60b4243847610f65455":
   version "1.7.0"
-  resolved "https://github.com/Kuzirashi/safe-deployments.git#f3c3d9760b3d477a65bc5b718d9682574d4a7323"
+  resolved "https://github.com/Kuzirashi/safe-deployments.git#eab2f53e9a53cf79c485f60b4243847610f65455"
 
 "@gnosis.pm/safe-react-components@^0.9.0":
   version "0.9.0"
