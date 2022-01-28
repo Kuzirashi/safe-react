@@ -21,11 +21,6 @@ jobs:
         with:
           node-version: 14
 
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
       # Set production flag on staging
       - name: Set production flag for staging
         run: echo "REACT_APP_ENV=dev" >> $GITHUB_ENV
