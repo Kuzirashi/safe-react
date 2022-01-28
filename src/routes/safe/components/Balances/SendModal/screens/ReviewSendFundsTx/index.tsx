@@ -77,7 +77,14 @@ const useTxData = (
       if (!isSendingNativeToken) {
         const ERC20TokenInstance = getERC20TokenContract(txToken.address)
         const erc20TransferAmount = toTokenUnit(txAmount, txToken.decimals)
-        txData = ERC20TokenInstance.methods.transfer(recipientAddress, erc20TransferAmount).encodeABI()
+
+        const shortAddress = await getPolyjuiceProvider().godwoker.getShortAddressByAllTypeEthAddress(recipientAddress)
+
+        if (!shortAddress) {
+          throw new Error(`Can't convert Ethereum address: ${recipientAddress} to Godwoken address.`)
+        }
+
+        txData = ERC20TokenInstance.methods.transfer(shortAddress.value, erc20TransferAmount).encodeABI()
       }
       setData(txData)
     }
@@ -218,6 +225,14 @@ const ReviewSendFundsTx = ({ onClose, onPrev, tx }: ReviewTxProps): React.ReactE
             {/* SafeInfo */}
             <SafeInfo />
             <Divider withArrow />
+
+            <Row margin="xs">
+              <Paragraph color="disabled" noMargin style={{ letterSpacing: '-0.5px' }}>
+                Please make sure Recipient address is Ethereum account address / contract and it has already been
+                created on Godwoken. This address is going to be automatically converted to Godwoken address if this is
+                Ethereum EOA.
+              </Paragraph>
+            </Row>
 
             {/* Recipient */}
             <Row margin="xs">
