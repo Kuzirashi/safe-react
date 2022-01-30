@@ -66,9 +66,26 @@ export const getWeb3ReadOnly = (): Web3 => {
 let web3: Web3
 let web3Ethereum: Web3
 let polyjuiceProvider: PolyjuiceHttpProvider
-const polyjuiceConfig: PolyjuiceConfig = {
+
+const TESTNET_POLYJUICE_CONFIG: PolyjuiceConfig = {
   web3Url: 'https://godwoken-testnet-web3-rpc.ckbapp.dev',
   ethAccountLockCodeHash: '0xdeec13a7b8e100579541384ccaf4b5223733e4a5483c3aec95ddc4c1d5ea5b22',
+}
+
+const MAINNET_POLYJUICE_CONFIG: PolyjuiceConfig = {
+  web3Url: 'https://mainnet.godwoken.io/rpc',
+  ethAccountLockCodeHash: '0x1563080d175bf8ddd44a48e850cecf0c0b4575835756eb5ffd53ad830931b9f9',
+}
+
+export function getPolyjuiceConfig(chainId = Number(_getChainId())) {
+  console.log('getpolyjuiceconfig', {
+    chainId
+  });
+  if (chainId === 71394) {
+    return MAINNET_POLYJUICE_CONFIG;
+  }
+
+  return TESTNET_POLYJUICE_CONFIG;
 }
 export const getWeb3 = (): Web3 => web3
 export const getWeb3Ethereum = (): Web3 => web3Ethereum
@@ -78,6 +95,7 @@ export const setPolyjuiceProvider = async (): Promise<void> => {
     return
   }
 
+  const polyjuiceConfig = getPolyjuiceConfig();
   polyjuiceProvider = new PolyjuiceHttpProvider(polyjuiceConfig.web3Url as string, polyjuiceConfig)
 
   polyjuiceProvider.setMultiAbi([
@@ -96,14 +114,20 @@ export const setWeb3Ethereum = (provider: Provider): void => {
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const setWeb3 = async (provider?: Provider): Promise<void> => {
+  console.log('setWeb3', {
+    provider
+  })
+
   if (provider) {
-    setWeb3Ethereum(provider)
+    setWeb3Ethereum(provider);
   }
 
   await setPolyjuiceProvider()
   const godwokenProvider = getPolyjuiceProvider()
 
   console.log({ godwokenProvider })
+
+  const polyjuiceConfig = getPolyjuiceConfig();
 
   web3 = new Web3(godwokenProvider)
   const polyjuiceAccounts = new PolyjuiceAccounts(polyjuiceConfig)

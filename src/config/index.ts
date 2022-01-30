@@ -10,8 +10,6 @@ import {
 import {
   GATEWAY_URL,
   DEFAULT_CHAIN_ID,
-  ETHERSCAN_API_KEY,
-  INFURA_TOKEN,
   SAFE_APPS_RPC_TOKEN,
   TX_SERVICE_VERSION,
 } from 'src/utils/constants'
@@ -65,25 +63,25 @@ export const getNativeCurrency = (): ChainInfo['nativeCurrency'] => {
   return getChainInfo().nativeCurrency
 }
 
-const formatRpcServiceUrl = ({ authentication, value }: RpcUri, TOKEN: string): string => {
+const formatRpcServiceUrl = ({ authentication, value }: RpcUri): string => {
   const needsToken = authentication === RPC_AUTHENTICATION.API_KEY_PATH
-  return needsToken ? `${value}${TOKEN}` : value
+  return needsToken ? `${value}` : value
 }
 
 export const getRpcServiceUrl = (): string => {
   const { rpcUri } = getChainInfo()
-  return formatRpcServiceUrl(rpcUri, INFURA_TOKEN)
+  return formatRpcServiceUrl(rpcUri)
 }
 
 export const getPublicRpcUrl = (): string => {
   const { publicRpcUri } = getChainInfo()
   // Don't pass any auth token because this RPC is for user's wallet
-  return formatRpcServiceUrl(publicRpcUri, '')
+  return formatRpcServiceUrl(publicRpcUri)
 }
 
 export const getSafeAppsRpcServiceUrl = (): string => {
   const { safeAppsRpcUri } = getChainInfo()
-  return formatRpcServiceUrl(safeAppsRpcUri, SAFE_APPS_RPC_TOKEN)
+  return formatRpcServiceUrl(safeAppsRpcUri)
 }
 
 export const getGasPriceOracles = (): Extract<ChainInfo['gasPrice'][number], GasPriceOracle>[] => {
@@ -129,7 +127,7 @@ export const getHashedExplorerUrl = (hash: string): string => {
 
 // Matches return type of ExplorerInfo from SRC
 export const getExplorerInfo = (hash: string): (() => { url: string; alt: string }) => {
-  const url = getHashedExplorerUrl(hash)
+  const url = getHashedExplorerUrl(hash) || 'https://not-implemented-block-explorer.com'
 
   const { hostname } = new URL(url)
   const alt = `View on ${hostname}` // Not returned by CGW
@@ -137,7 +135,7 @@ export const getExplorerInfo = (hash: string): (() => { url: string; alt: string
 }
 
 const getExplorerApiKey = (apiUrl: string): string | undefined => {
-  return apiUrl.includes('etherscan') && ETHERSCAN_API_KEY ? ETHERSCAN_API_KEY : undefined
+  return undefined
 }
 
 const fetchContractAbi = async (contractAddress: string) => {

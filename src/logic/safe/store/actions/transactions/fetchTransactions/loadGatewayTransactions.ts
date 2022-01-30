@@ -140,9 +140,9 @@ export const loadQueuedTransactions = async (safeAddress: string): Promise<Queue
   try {
     const { results, next, previous } = await getTransactionQueue(GATEWAY_URL, chainId, checksumAddress(safeAddress))
 
-    console.log('XXXX loadQueuedTransactions', {
-      results,
-    })
+    // console.log('XXXX loadQueuedTransactions', {
+    //   results,
+    // })
 
     if (!queuedPointers[chainId]) {
       queuedPointers[chainId] = {}

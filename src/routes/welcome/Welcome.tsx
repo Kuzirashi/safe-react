@@ -16,7 +16,11 @@ function Welcome(): ReactElement {
           Welcome to Gnosis Safe.
         </Title>
         <Title size="xs">
-          Gnosis Safe is the most trusted platform to manage digital assets. <br /> Here is how to get started:
+          Gnosis Safe is the most trusted platform to manage digital assets. <br/><br/>
+          
+          Make sure to choose in MetaMask Godwoken Testnet or Godwoken Mainnet network.
+          
+          <br /><br/> Here is how to get started:
         </Title>
         <CardsContainer>
           <StyledCard>

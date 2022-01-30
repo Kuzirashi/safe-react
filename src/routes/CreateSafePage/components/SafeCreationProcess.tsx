@@ -9,7 +9,6 @@ import { getSafeDeploymentTransaction } from 'src/logic/contracts/safeContracts'
 import { txMonitor } from 'src/logic/safe/transactions/txMonitor'
 import { userAccountSelector } from 'src/logic/wallets/store/selectors'
 import { SafeDeployment } from 'src/routes/opening'
-import { useAnalytics, USER_EVENTS } from 'src/utils/googleAnalytics'
 import { loadFromStorage, removeFromStorage, saveToStorage } from 'src/utils/storage'
 import { addOrUpdateSafe } from 'src/logic/safe/store/actions/addOrUpdateSafe'
 import {
@@ -37,6 +36,7 @@ import { getExplorerInfo, getShortName } from 'src/config'
 import { getGasParam } from 'src/logic/safe/transactions/gas'
 import { currentChainId } from 'src/logic/config/store/selectors'
 import PrefixedEthHashInfo from 'src/components/PrefixedEthHashInfo'
+import { useAnalytics, USER_EVENTS } from 'src/utils/googleAnalytics'
 
 export const InlinePrefixedEthHashInfo = styled(PrefixedEthHashInfo)`
   display: inline-flex;

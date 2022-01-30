@@ -51,7 +51,7 @@ export const gatewayTransactionsReducer = handleActions<GatewayTransactionsState
       const newHistory: StoreStructure['history'] = cloneDeep(state[chainId]?.[safeAddress]?.history || {})
 
       values.forEach((value) => {
-        console.log('ADD_HISTORY_TRANSACTIONS', value)
+        // console.log('ADD_HISTORY_TRANSACTIONS', value)
 
         if (isDateLabel(value)) {
           // DATE_LABEL is discarded as it's not needed for the current implementation

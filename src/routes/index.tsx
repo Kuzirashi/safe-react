@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux'
 import { matchPath, Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
 import { LoadingContainer } from 'src/components/LoaderContainer'
-import { useAnalytics } from 'src/utils/googleAnalytics'
 import { lastViewedSafe } from 'src/logic/currentSession/store/selectors'
 import {
   generateSafeRoute,
@@ -36,7 +35,6 @@ const Routes = (): React.ReactElement => {
   const location = useLocation()
   const { pathname, search } = location
   const defaultSafe = useSelector(lastViewedSafe)
-  const { trackPage } = useAnalytics()
 
   // Component key that changes when addressed route slug changes
   const { key } = useAddressedRouteKey()
@@ -58,14 +56,12 @@ const Routes = (): React.ReactElement => {
       trackedPath = trackedPath.replace(match?.params[TRANSACTION_ID_SLUG], 'TRANSACTION_ID')
     }
 
-    trackPage(trackedPath + search)
-
     // Set the initial network id from the URL.
     // It depends on the chains
     switchNetworkWithUrl({ pathname })
 
     // Track when pathname changes
-  }, [pathname, search, trackPage])
+  }, [pathname, search])
 
   return (
     <Switch>
