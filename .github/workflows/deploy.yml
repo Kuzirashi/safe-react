@@ -28,6 +28,8 @@ jobs:
 
       - run: yarn
       - run: cd node_modules/@polyjuice-provider/web3 && yarn && yarn build
+      - run: rm -rf node_modules/@gnosis.pm/safe-core-sdk/node_modules/@gnosis.pm/safe-deployments
+      - run: cp -R node_modules/@gnosis.pm/safe-deployments node_modules/@gnosis.pm/safe-core-sdk/node_modules/@gnosis.pm/safe-deployments
       - run: yarn generate-types
       - run: yarn build
 
